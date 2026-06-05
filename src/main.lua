@@ -4,7 +4,8 @@ asteroids.player = { angle = 0, coords = {} }
 asteroids.bullets = { }
 asteroids.asteroids = { }
 
-asteroids.bulletSpeed = 10  -- Good value seems to be about 200 ish?
+asteroids.bulletSpeed = 250  -- Good value seems to be about 200 ish?
+asteroids.turnRate = 3
 
 require "angleTable"
 require "shapes"
@@ -30,9 +31,9 @@ function love.update( dt )
 	if love.keyboard.isDown("right") then
 		asteroids.updatePlayerAngle("right")
 	end
-	if love.keyboard.isDown("space") then
-		asteroids.fireBullet(asteroids.player.angle)
-	end
+	-- if love.keyboard.isDown("space") then
+	-- 	asteroids.fireBullet(asteroids.player.angle)
+	-- end
 	asteroids.updateBullets()
 end
 function love.keypressed( key, scancode, isrepeat )
@@ -55,9 +56,9 @@ function asteroids.init()
 end
 function asteroids.updatePlayerAngle(key)
 	if key == "left" then
-		asteroids.player.angle = asteroids.player.angle - 1
+		asteroids.player.angle = asteroids.player.angle - asteroids.turnRate
 	elseif key == "right" then
-		asteroids.player.angle = asteroids.player.angle + 1
+		asteroids.player.angle = asteroids.player.angle + asteroids.turnRate
 	end
 	if asteroids.player.angle>=360 then
 		asteroids.player.angle = 0
@@ -89,7 +90,7 @@ end
 function asteroids.updateBullets()
 	local distance, csTable, c, s, x, y
 	for b = #asteroids.bullets, 1, -1 do
-		print(#asteroids.bullets)
+		-- print(#asteroids.bullets)
 		local bullet = asteroids.bullets[b]
 		distance = asteroids.bulletSpeed * (love.timer.getTime() - bullet.fired)
 		csTable = asteroids.angleTable[bullet.angle]
