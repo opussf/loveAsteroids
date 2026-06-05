@@ -130,7 +130,7 @@ function asteroids.updateAsteroids()
 		for a = 1, newCount do
 			local x, y
 			local pathAngle = math.random(360)
-			local pathSpeed = 10
+			local pathSpeed = math.random(51) + 9
 			local side = math.random(4)
 
 			if side == 1 then -- left
