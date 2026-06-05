@@ -1,5 +1,3 @@
-print(...)
-
-astroids.shapes = {
-	["player"] = {},
+asteroids.shapes = {
+	["player"] = {{20,0}, {-5,5}, {0,0}, {-5,-5}},
 }
