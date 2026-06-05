@@ -4,6 +4,8 @@ asteroids.player = { angle = 0, coords = {} }
 asteroids.bullets = { }
 asteroids.asteroids = { }
 
+asteroids.score = 0
+
 asteroids.bulletSpeed = 250  -- Good value seems to be about 200 ish?
 asteroids.turnRate = 3
 
@@ -35,6 +37,7 @@ function love.update( dt )
 	-- 	asteroids.fireBullet(asteroids.player.angle)
 	-- end
 	asteroids.updateBullets()
+	asteroids.updateAsteroids()
 end
 function love.keypressed( key, scancode, isrepeat )
 	print( key, scancode, isrepeat )
@@ -45,6 +48,7 @@ end
 function love.draw()
 	asteroids.drawPlayer()
 	asteroids.drawBullets()
+	asteroids.drawAsteroids()
 end
 
 -- asteroids
@@ -108,15 +112,67 @@ function asteroids.updateBullets()
 		end
 	end
 end
-
 function asteroids.drawBullets()
 	for b, bullet in ipairs( asteroids.bullets ) do
 		love.graphics.polygon("line", bullet.coords)
 	end
 end
-
 function asteroids.fireBullet( angle )
 	asteroids.bullets[#asteroids.bullets+1] = { angle = angle, fired = love.timer.getTime( ), x=0, y=0, coords = {} }
 	print("fired: ", angle, love.timer.getTime() )
+end
 
+-- asteroids
+
+function asteroids.updateAsteroids()
+	if #asteroids.asteroids < 1 then  -- less than 1 asteroid
+		local newCount = math.random(1)  -- 5?
+		for a = 1, newCount do
+			local x, y
+			local pathAngle = math.random(360)
+			local pathSpeed = 10
+			local side = math.random(4)
+
+			if side == 1 then -- left
+				x = math.random(100)
+				y = math.random(asteroids.height)
+			elseif side == 2 then -- top
+				x = math.random(asteroids.width)
+				y = math.random(100)
+			elseif side == 3 then -- right
+				x = asteroids.width - math.random(100)
+				y = math.random(asteroids.height)
+			else -- bottom (4)
+				x = math.random(asteroids.width)
+				y = asteroids.height - math.random(100)
+			end
+			local spinSpeed = 10
+
+			print(a, pathAngle, side, x, y)
+			asteroids.asteroids[#asteroids.asteroids+1] = {
+					spinAngle = 0,
+					spinSpeed = spinSpeed,
+					spawned = love.timer.getTime(),
+					x=x, y=y, pathAngle = pathAngle, pathSpeed = pathSpeed,
+					size = 3, coords = {} }
+		end
+	end
+	for a, asteroid in ipairs( asteroids.asteroids ) do
+		local distance = asteroid.pathSpeed * (love.timer.getTime() - asteroid.spawned)
+		local csTable, pc, ps = asteroids.angleTable[asteroid.pathAngle]
+		pc = csTable[1]; ps = csTable[2]
+		local x = asteroid.x + (distance * pc)
+		local y = asteroid.y + (distance * ps)
+		for i, coord in ipairs( asteroids.shapes.asteroid ) do
+			asteroid.coords[((i-1)*2)+1] = x + coord[1]*3
+			asteroid.coords[((i-1)*2)+2] = y + coord[2]*3
+		end
+		-- print(x, y, distance, table.concat(asteroid.coords, ", "))
+	end
+end
+function asteroids.drawAsteroids()
+	for _, asteroid in ipairs( asteroids.asteroids ) do
+		print(table.concat(asteroid.coords, ", "))
+		love.graphics.polygon("line", asteroid.coords )
+	end
 end

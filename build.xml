@@ -6,7 +6,7 @@
 	<property environment="env"/>
 	<property name="env.BUILD_NUMBER" value=""/>
 	<property name="build.number" value=""/>
-	<property name="addon.dir" location="${ADDONLOC}/${ant.project.name}"/>
+
 	<!--  Pull git repo info -->
 	<!-- Get the last tag reachable from this branch -->
 	<exec executable="git" dir="." outputproperty="git.tag" failifexecutionfails="false" errorproperty="">
@@ -107,7 +107,7 @@
 		<echo file="${target.dir}/${project.love}.md5">${zip.md5} ${project.zip}${line.separator}</echo>
 	</target>
 
-	<target name="open" depends="package" description="open the addon dir in the current wow install">
+	<target name="open" depends="package" description="runs the game">
 		<exec executable="open">
 			<arg value="${target.dir}/${project.love}"/>
 		</exec>
