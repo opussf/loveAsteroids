@@ -126,7 +126,7 @@ end
 
 function asteroids.updateAsteroids()
 	if #asteroids.asteroids < 1 then  -- less than 1 asteroid
-		local newCount = math.random(1)  -- 5?
+		local newCount = math.random(5)  -- 5?
 		for a = 1, newCount do
 			local x, y
 			local pathAngle = math.random(360)
@@ -146,7 +146,7 @@ function asteroids.updateAsteroids()
 				x = math.random(asteroids.width)
 				y = asteroids.height - math.random(100)
 			end
-			local spinSpeed = 10
+			local spinSpeed = 15
 
 			print(a, pathAngle, side, x, y)
 			asteroids.asteroids[#asteroids.asteroids+1] = {
@@ -158,31 +158,35 @@ function asteroids.updateAsteroids()
 		end
 	end
 	for a, asteroid in ipairs( asteroids.asteroids ) do
+		-- move
 		local distance = asteroid.pathSpeed * (love.timer.getTime() - asteroid.spawned)
 		local csTable, pc, ps = asteroids.angleTable[asteroid.pathAngle]
-		pc = csTable[1]; ps = csTable[2]
-		local x = asteroid.x + (distance * pc)
-		local y = asteroid.y + (distance * ps)
+		c = csTable[1]; s = csTable[2]
+		local x = asteroid.x + (distance * c)
+		local y = asteroid.y + (distance * s)
 		if x < 0 then asteroid.x = asteroids.width; asteroid.spawned = love.timer.getTime() end
 		if x > asteroids.width then asteroid.x = 0; asteroid.spawned = love.timer.getTime() end
 		if y < 0 then asteroid.y = asteroids.height; asteroid.spawned = love.timer.getTime() end
 		if y > asteroids.height then asteroid.y = 0; asteroid.spawned = love.timer.getTime() end
 
+		-- rotate
+		-- local rotate = asteroid.spinAngle + (asteroid.spinSpeed * (love.timer.getTime() - asteroid.spawned))
+		-- if rotate < 0 then rotate = rotate + 360 end
+		-- if rotate > 360 then rotate = rotate - 360 end
 
-
-
-		-- local
+		-- csTable = asteroids.angleTable[rotate]
+		-- c = csTable[1]; s = csTable[2]
 
 		for i, coord in ipairs( asteroids.shapes.asteroid ) do
-			asteroid.coords[((i-1)*2)+1] = x + coord[1] * asteroid.size
-			asteroid.coords[((i-1)*2)+2] = y + coord[2] * asteroid.size
+			asteroid.coords[((i-1)*2)+1] = x + (coord[1] * asteroid.size) -- + coord[1]*c - coord[2]*s
+			asteroid.coords[((i-1)*2)+2] = y + (coord[2] * asteroid.size) -- + coord[1]*s + coord[2]*c
 		end
-		-- print(x, y, distance, table.concat(asteroid.coords, ", "))
+		print(x, y, distance, rotate)
 	end
 end
 function asteroids.drawAsteroids()
 	for _, asteroid in ipairs( asteroids.asteroids ) do
-		print(asteroid.spawned, table.concat(asteroid.coords, ", "))
+		-- print(asteroid.spawned, table.concat(asteroid.coords, ", "))
 		love.graphics.polygon("line", asteroid.coords )
 	end
 end
