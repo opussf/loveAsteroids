@@ -163,16 +163,26 @@ function asteroids.updateAsteroids()
 		pc = csTable[1]; ps = csTable[2]
 		local x = asteroid.x + (distance * pc)
 		local y = asteroid.y + (distance * ps)
+		if x < 0 then asteroid.x = asteroids.width; asteroid.spawned = love.timer.getTime() end
+		if x > asteroids.width then asteroid.x = 0; asteroid.spawned = love.timer.getTime() end
+		if y < 0 then asteroid.y = asteroids.height; asteroid.spawned = love.timer.getTime() end
+		if y > asteroids.height then asteroid.y = 0; asteroid.spawned = love.timer.getTime() end
+
+
+
+
+		-- local
+
 		for i, coord in ipairs( asteroids.shapes.asteroid ) do
-			asteroid.coords[((i-1)*2)+1] = x + coord[1]*3
-			asteroid.coords[((i-1)*2)+2] = y + coord[2]*3
+			asteroid.coords[((i-1)*2)+1] = x + coord[1] * asteroid.size
+			asteroid.coords[((i-1)*2)+2] = y + coord[2] * asteroid.size
 		end
 		-- print(x, y, distance, table.concat(asteroid.coords, ", "))
 	end
 end
 function asteroids.drawAsteroids()
 	for _, asteroid in ipairs( asteroids.asteroids ) do
-		print(table.concat(asteroid.coords, ", "))
+		print(asteroid.spawned, table.concat(asteroid.coords, ", "))
 		love.graphics.polygon("line", asteroid.coords )
 	end
 end
