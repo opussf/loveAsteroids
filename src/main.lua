@@ -38,9 +38,10 @@ function love.update( dt )
 	-- end
 	asteroids.updateBullets()
 	asteroids.updateAsteroids()
+	asteroids.detectCollisions()
 end
 function love.keypressed( key, scancode, isrepeat )
-	print( key, scancode, isrepeat )
+	-- print( key, scancode, isrepeat )
 	if key == "space" then
 		asteroids.fireBullet(asteroids.player.angle)
 	end
@@ -54,7 +55,7 @@ end
 -- asteroids
 
 function asteroids.init()
-	print(asteroids.width, asteroids.height)
+	-- print(asteroids.width, asteroids.height)
 	asteroids.playerSetPoints()
 	asteroids.drawPlayer()
 end
@@ -101,6 +102,7 @@ function asteroids.updateBullets()
 		c, s = csTable[1], csTable[2]
 		x = asteroids.center[1] + (distance * c)
 		y = asteroids.center[2] + (distance * s)
+		bullet.x = x; bullet.y = y
 		if x>asteroids.width or x<0 or y>asteroids.height or y<0 then
 			table.remove(asteroids.bullets, b)
 		else
@@ -119,7 +121,7 @@ function asteroids.drawBullets()
 end
 function asteroids.fireBullet( angle )
 	asteroids.bullets[#asteroids.bullets+1] = { angle = angle, fired = love.timer.getTime( ), x=0, y=0, coords = {} }
-	print("fired: ", angle, love.timer.getTime() )
+	-- print("fired: ", angle, love.timer.getTime() )
 end
 
 -- asteroids
@@ -154,10 +156,10 @@ function asteroids.updateAsteroids()
 					spinSpeed = spinSpeed,
 					spawned = love.timer.getTime(),
 					x=x, y=y, pathAngle = pathAngle, pathSpeed = pathSpeed,
-					size = 3, coords = {} }
+					size = 4, coords = {} }
 		end
 	end
-	for a, asteroid in ipairs( asteroids.asteroids ) do
+	for ai, asteroid in ipairs( asteroids.asteroids ) do
 		-- move
 		local distance = asteroid.pathSpeed * (love.timer.getTime() - asteroid.spawned)
 		local csTable, pc, ps = asteroids.angleTable[asteroid.pathAngle]
@@ -168,6 +170,7 @@ function asteroids.updateAsteroids()
 		if x > asteroids.width then asteroid.x = 0; asteroid.spawned = love.timer.getTime() end
 		if y < 0 then asteroid.y = asteroids.height; asteroid.spawned = love.timer.getTime() end
 		if y > asteroids.height then asteroid.y = 0; asteroid.spawned = love.timer.getTime() end
+		asteroid.px = x; asteroid.py = y
 
 		-- rotate
 		-- local rotate = asteroid.spinAngle + (asteroid.spinSpeed * (love.timer.getTime() - asteroid.spawned))
@@ -181,12 +184,49 @@ function asteroids.updateAsteroids()
 			asteroid.coords[((i-1)*2)+1] = x + (coord[1] * asteroid.size) -- + coord[1]*c - coord[2]*s
 			asteroid.coords[((i-1)*2)+2] = y + (coord[2] * asteroid.size) -- + coord[1]*s + coord[2]*c
 		end
-		print(x, y, distance, rotate)
+		-- print(x, y, distance, rotate)
 	end
 end
 function asteroids.drawAsteroids()
 	for _, asteroid in ipairs( asteroids.asteroids ) do
-		-- print(asteroid.spawned, table.concat(asteroid.coords, ", "))
+		-- print(_, asteroid.spawned, asteroid.px, asteroid.py, asteroid.pathAngle)
 		love.graphics.polygon("line", asteroid.coords )
+	end
+end
+
+-- Collisions
+
+function asteroids.detectCollisions()
+	-- detect collisions from the asteroid perspective
+	for ai = #asteroids.asteroids, 1, -1 do  -- in reverse to be able to modify
+		a = asteroids.asteroids[ai]
+		for bi = #asteroids.bullets, 1, -1 do  -- in reverse to be able to modify
+			b = asteroids.bullets[bi]
+			local distance = ((a.px-b.x)^2 + (a.py-b.y)^2)^0.5
+			-- print(string.format("a: (%0.2f,%0.2f) b: (%0.2f,%0.2f) d: %0.2f %s", a.px, a.py, b.x, b.y, distance, distance < a.size*10))
+			if distance < a.size*10 then
+				table.remove( asteroids.bullets, bi )  -- destory bullet
+				asteroids.asteroids[ai].size = a.size / 2 -- half asteroid
+				print("hit", ai, a.size, asteroids.asteroids[ai].size )
+				if asteroids.asteroids[ai].size < 1 then  -- destroy asteroid
+					print("pop", ai)
+					table.remove(asteroids.asteroids, ai)
+				else -- spawn new astroid
+					-- do a deep copy.
+					na = {}
+					for k,v in pairs(a) do
+						na[k] = v
+					end
+					na.coords = {}
+					for i, c in ipairs(a.coords) do
+						na.coords[i] = c
+					end
+					na.x = na.px; na.y = na.py; na.spawned = love.timer.getTime()
+					na.pathAngle = na.pathAngle + math.random(-30,30)
+					asteroids.asteroids[#asteroids.asteroids+1] = na
+					print("spawn", #asteroids.asteroids, a.pathAngle, na.pathAngle)
+				end
+			end
+		end
 	end
 end
