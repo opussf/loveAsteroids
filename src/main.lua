@@ -5,8 +5,9 @@ asteroids.bullets = { }
 asteroids.asteroids = { }
 
 asteroids.score = 0
+asteroids.lives = 3
 
-asteroids.bulletSpeed = 250  -- Good value seems to be about 200 ish?
+asteroids.bulletSpeed = 250  -- Good value seems to be about 250 ish?
 asteroids.turnRate = 3
 
 require "angleTable"
