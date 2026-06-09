@@ -222,11 +222,14 @@ function asteroids.detectCollisions()
 						na.coords[i] = c
 					end
 					na.x = na.px; na.y = na.py; na.spawned = love.timer.getTime()
-					na.pathAngle = na.pathAngle + math.random(-30,30)
+					na.pathAngle = na.pathAngle + math.random(-45,45)
 					asteroids.asteroids[#asteroids.asteroids+1] = na
 					print("spawn", #asteroids.asteroids, a.pathAngle, na.pathAngle)
 				end
 			end
+		end
+		if ((a.px-asteroids.center[1])^2 + (a.py-asteroids.center[2])^2)^0.5 < a.size*10 then
+
 		end
 	end
 end
