@@ -50,6 +50,7 @@ function love.draw()
 	asteroids.drawPlayer()
 	asteroids.drawBullets()
 	asteroids.drawAsteroids()
+	asteroids.drawUI()
 end
 
 -- asteroids
@@ -162,7 +163,7 @@ function asteroids.updateAsteroids( dt )
 	for ai, asteroid in ipairs( asteroids.asteroids ) do
 		-- copy and rotate
 		local rotate = (asteroid.spinAngle + (asteroid.spinSpeed * (love.timer.getTime() - asteroid.spawned))) % 360
-		csTable = asteroids.angleTable[rotate]
+		csTable = asteroids.angleTable[math.floor(rotate*10)/10]
 
 		c = csTable[1]; s = csTable[2]
 		for i, coord in ipairs( asteroids.shapes.asteroid ) do
@@ -186,13 +187,6 @@ function asteroids.updateAsteroids( dt )
 			asteroid.coords[((i-1)*2)+1] = x + asteroid.coords[((i-1)*2)+1]
 			asteroid.coords[((i-1)*2)+2] = y + asteroid.coords[((i-1)*2)+2]
 		end
-
-
-		-- for i, coord in ipairs( asteroids.shapes.asteroid ) do
-		-- 	asteroid.coords[((i-1)*2)+1] = x + (coord[1] * asteroid.size) -- + coord[1]*c - coord[2]*s
-		-- 	asteroid.coords[((i-1)*2)+2] = y + (coord[2] * asteroid.size) -- + coord[1]*s + coord[2]*c
-		-- end
-		-- print(x, y, distance, rotate)
 	end
 end
 function asteroids.drawAsteroids()
@@ -214,12 +208,17 @@ function asteroids.detectCollisions()
 			-- print(string.format("a: (%0.2f,%0.2f) b: (%0.2f,%0.2f) d: %0.2f %s", a.px, a.py, b.x, b.y, distance, distance < a.size*10))
 			if distance < a.size*10 then
 				table.remove( asteroids.bullets, bi )  -- destory bullet
+				print("hit", ai, a.size, asteroids.asteroids[ai].size, (4 * 10) / asteroids.asteroids[ai].size )
+				asteroids.score = asteroids.score + (4*10) / a.size
 				asteroids.asteroids[ai].size = a.size / 2 -- half asteroid
-				print("hit", ai, a.size, asteroids.asteroids[ai].size )
 				if asteroids.asteroids[ai].size < 1 then  -- destroy asteroid
 					print("pop", ai)
 					table.remove(asteroids.asteroids, ai)
 				else -- spawn new astroid
+					-- increase speed and rotation
+					local mult = math.max(1, (asteroids.score % 10000) / 4000)
+					a.pathSpeed = a.pathSpeed * mult
+					a.spinSpeed = a.spinSpeed * mult
 					-- do a deep copy.
 					na = {}
 					for k,v in pairs(a) do
@@ -240,4 +239,12 @@ function asteroids.detectCollisions()
 			print("Player hit")
 		end
 	end
+end
+
+-- UI
+
+function asteroids.drawUI()
+	love.graphics.setColor( 1, 0, 0, 1 )
+	love.graphics.print( string.format( "Score: %i", asteroids.score ), 10, 10 )
+	love.graphics.print( love.timer.getFPS(), 10, 20 )
 end
