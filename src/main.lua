@@ -49,6 +49,7 @@ function love.draw()
 	asteroids.drawPlayer()
 	asteroids.drawBullets()
 	asteroids.drawAsteroids()
+	asteroids.drawUI()
 end
 
 -- asteroids
@@ -213,8 +214,9 @@ function asteroids.detectCollisions()
 			-- print(string.format("a: (%0.2f,%0.2f) b: (%0.2f,%0.2f) d: %0.2f %s", a.px, a.py, b.x, b.y, distance, distance < a.size*10))
 			if distance < a.size*10 then
 				table.remove( asteroids.bullets, bi )  -- destory bullet
+				print("hit", ai, a.size, asteroids.asteroids[ai].size, (4 * 10) / asteroids.asteroids[ai].size )
+				asteroids.score = asteroids.score + (4*10) / a.size
 				asteroids.asteroids[ai].size = a.size / 2 -- half asteroid
-				print("hit", ai, a.size, asteroids.asteroids[ai].size )
 				if asteroids.asteroids[ai].size < 1 then  -- destroy asteroid
 					print("pop", ai)
 					table.remove(asteroids.asteroids, ai)
@@ -236,4 +238,13 @@ function asteroids.detectCollisions()
 			end
 		end
 	end
+end
+
+-- UI
+
+function asteroids.drawUI()
+	love.graphics.setColor( 1, 0, 0, 1 )
+	love.graphics.print( string.format( "Score: %i", asteroids.score ), 10, 10 )
+	love.graphics.print( love.timer.getFPS(), 10, 20 )
+
 end
