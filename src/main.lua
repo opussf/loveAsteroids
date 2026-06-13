@@ -162,7 +162,7 @@ function asteroids.updateAsteroids( dt )
 	for ai, asteroid in ipairs( asteroids.asteroids ) do
 		-- copy and rotate
 		local rotate = (asteroid.spinAngle + (asteroid.spinSpeed * (love.timer.getTime() - asteroid.spawned))) % 360
-		csTable = asteroids.angleTable[rotate]
+		csTable = asteroids.angleTable[math.floor(rotate*10)/10]
 
 		c = csTable[1]; s = csTable[2]
 		for i, coord in ipairs( asteroids.shapes.asteroid ) do
@@ -186,13 +186,6 @@ function asteroids.updateAsteroids( dt )
 			asteroid.coords[((i-1)*2)+1] = x + asteroid.coords[((i-1)*2)+1]
 			asteroid.coords[((i-1)*2)+2] = y + asteroid.coords[((i-1)*2)+2]
 		end
-
-
-		-- for i, coord in ipairs( asteroids.shapes.asteroid ) do
-		-- 	asteroid.coords[((i-1)*2)+1] = x + (coord[1] * asteroid.size) -- + coord[1]*c - coord[2]*s
-		-- 	asteroid.coords[((i-1)*2)+2] = y + (coord[2] * asteroid.size) -- + coord[1]*s + coord[2]*c
-		-- end
-		-- print(x, y, distance, rotate)
 	end
 end
 function asteroids.drawAsteroids()
@@ -221,6 +214,10 @@ function asteroids.detectCollisions()
 					print("pop", ai)
 					table.remove(asteroids.asteroids, ai)
 				else -- spawn new astroid
+					-- increase speed and rotation
+					local mult = math.max(1, (asteroids.score % 10000) / 4000)
+					a.pathSpeed = a.pathSpeed * mult
+					a.spinSpeed = a.spinSpeed * mult
 					-- do a deep copy.
 					na = {}
 					for k,v in pairs(a) do
@@ -246,5 +243,4 @@ function asteroids.drawUI()
 	love.graphics.setColor( 1, 0, 0, 1 )
 	love.graphics.print( string.format( "Score: %i", asteroids.score ), 10, 10 )
 	love.graphics.print( love.timer.getFPS(), 10, 20 )
-
 end
