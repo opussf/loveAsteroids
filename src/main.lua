@@ -237,7 +237,7 @@ function asteroids.detectCollisions()
 			end
 		end
 		if ((a.px-asteroids.center[1])^2 + (a.py-asteroids.center[2])^2)^0.5 < a.size*10 then
-
+			print("Player hit")
 		end
 	end
 end
