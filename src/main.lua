@@ -5,8 +5,9 @@ asteroids.bullets = { }
 asteroids.asteroids = { }
 
 asteroids.score = 0
+asteroids.lives = 3
 
-asteroids.bulletSpeed = 250  -- Good value seems to be about 200 ish?
+asteroids.bulletSpeed = 250  -- Good value seems to be about 250 ish?
 asteroids.turnRate = 3
 
 require "angleTable"
@@ -26,18 +27,20 @@ function love.load()
 	love.graphics.setLineStyle("rough")  -- or "smooth"
 end
 function love.update( dt )
-	if love.keyboard.isDown("left") then
-		asteroids.updatePlayerAngle("left")
+	if asteroids.lives > 0 then
+		if love.keyboard.isDown("left") then
+			asteroids.updatePlayerAngle("left")
+		end
+		if love.keyboard.isDown("right") then
+			asteroids.updatePlayerAngle("right")
+		end
+		-- if love.keyboard.isDown("space") then
+		-- 	asteroids.fireBullet(asteroids.player.angle)
+		-- end
+		asteroids.updateBullets()
+		asteroids.updateAsteroids( dt )
+		asteroids.detectCollisions()
 	end
-	if love.keyboard.isDown("right") then
-		asteroids.updatePlayerAngle("right")
-	end
-	-- if love.keyboard.isDown("space") then
-	-- 	asteroids.fireBullet(asteroids.player.angle)
-	-- end
-	asteroids.updateBullets()
-	asteroids.updateAsteroids( dt )
-	asteroids.detectCollisions()
 end
 function love.keypressed( key, scancode, isrepeat )
 	-- print( key, scancode, isrepeat )
@@ -228,11 +231,18 @@ function asteroids.detectCollisions()
 						na.coords[i] = c
 					end
 					na.x = na.px; na.y = na.py; na.spawned = love.timer.getTime()
-					na.pathAngle = na.pathAngle + math.random(-30,30)
+					na.pathAngle = na.pathAngle + math.random(-45,45)
 					asteroids.asteroids[#asteroids.asteroids+1] = na
 					print("spawn", #asteroids.asteroids, a.pathAngle, na.pathAngle)
 				end
 			end
+		end
+		if ((a.px-asteroids.center[1])^2 + (a.py-asteroids.center[2])^2)^0.5 < a.size*10 then
+			print("Player hit")
+			asteroids.lives = asteroids.lives - 1
+			asteroids.asteroids = {}
+			asteroids.bullets = {}
+			break
 		end
 	end
 end
@@ -241,6 +251,16 @@ end
 
 function asteroids.drawUI()
 	love.graphics.setColor( 1, 0, 0, 1 )
-	love.graphics.print( string.format( "Score: %i", asteroids.score ), 10, 10 )
-	love.graphics.print( love.timer.getFPS(), 10, 20 )
+
+	local px, py, pc = 0, 10, {}
+	for l = 1, asteroids.lives do
+		px = 20 * l
+		for i, coord in ipairs( asteroids.shapes.player ) do
+			pc[((i-1)*2)+1] = px + coord[1]
+			pc[((i-1)*2)+2] = py + coord[2]
+		end
+		love.graphics.polygon( 'fill', pc )
+	end
+	love.graphics.print( string.format( "Score: %i", asteroids.score ), 10, 20 )
+	love.graphics.print( love.timer.getFPS(), 10, 30 )
 end
