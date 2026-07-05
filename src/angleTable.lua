@@ -1,4 +1,4 @@
-asteroids.angleTable = {}
+angleTable = {}
 
 local function makeCS(t, angle)
 	local csTable = {}
@@ -13,4 +13,4 @@ local function makeCS(t, angle)
 	return csTable
 end
 
-setmetatable(asteroids.angleTable, {__index=makeCS})
+setmetatable(angleTable, {__index=makeCS})
